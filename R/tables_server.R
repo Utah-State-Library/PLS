@@ -18,7 +18,7 @@ output$table_collections <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTPHYS)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -99,7 +99,7 @@ output$table_circulation <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTCIR)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -203,7 +203,7 @@ output$table_expenses <- renderReactable({
       OTHOPEXP,
       #OTHOP_PCT
     ) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -288,7 +288,7 @@ output$table_staffexpenses <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -358,7 +358,7 @@ output$table_collectionexpenses <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -451,7 +451,7 @@ output$table_revenue <- renderReactable({
       OTHINCM,
       # OTH_PCT
     ) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTINCM)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -546,7 +546,7 @@ output$table_services <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(VISITS)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -617,7 +617,7 @@ output$table_internetaccess <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(GPTERMS)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -684,7 +684,7 @@ output$table_programming <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTPRO)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,
@@ -766,7 +766,7 @@ output$table_programAttend <- renderReactable({
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(cols), ~ as.numeric(.))) %>%
-    arrange(desc(FISCAL_YEAR), CURRENT_LIBNAME_DISAMB) %>%
+    arrange(desc(FISCAL_YEAR), desc(TOTATTEN)) %>%
     reactable(
       resizable = T,
       pagination = FALSE,

@@ -114,7 +114,7 @@ nav_panel(
         "states.table",
         "State",
         choices = states,
-        selected = states,
+        selected = c("CO", "NY", "UT", "RI"),
         multiple = TRUE,
         options = list(
           `live-search` = TRUE,
