@@ -141,6 +141,11 @@ nav_panel(
           ),
           `count-selected-text` = "All Libraries"
         )
+      ),
+      actionButton(
+        "submit.table",
+        "Submit",
+        width = "100%"
       )
     ),
 

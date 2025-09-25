@@ -1,15 +1,50 @@
-df_table <- reactive({
-  pls %>%
-    filter(
-      STABR %in% input$states.table,
-      CURRENT_LIBNAME_DISAMB %in% input$library.table,
-      FISCAL_YEAR %in% input$year.table
-    )
-})
+#### Dataset ####
+
+df_table <- eventReactive(
+  input$submit.table,
+  {
+    pls %>%
+      filter(
+        STABR %in% input$states.table,
+        CURRENT_LIBNAME_DISAMB %in% input$library.table,
+        FISCAL_YEAR %in% input$year.table
+      )
+  },
+  ignoreNULL = FALSE
+)
+
 
 #### Sync Inputs ####
 
+observe({
+  national_libnames <- pls %>%
+    filter(STABR %in% input$states.table) %>%
+    summarise(CURRENT_LIBNAME_DISAMB) %>%
+    distinct() %>%
+    pull() %>%
+    sort()
+
+  updatePickerInput(
+    session,
+    "library.table",
+    "Library Name",
+    choices = national_libnames,
+    selected = national_libnames,
+    options = list(
+      `live-search` = TRUE,
+      `actions-box` = TRUE,
+      `selected-text-format` = paste0(
+        "count > ",
+        length(national_libnames) - 1
+      ),
+      `count-selected-text` = "All Libraries"
+    )
+  )
+})
+
+
 #### Collections ####
+
 output$table_collections <- renderReactable({
   cols <- c("TOTPHYS", "BKVOL", "AUDIO_PH", "VIDEO_PH", "OTHMATS")
   key <- variable_key %>% filter(SHORTNAME %in% cols)
@@ -17,7 +52,7 @@ output$table_collections <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTPHYS)) %>%
     reactable(
       resizable = T,
@@ -98,7 +133,7 @@ output$table_circulation <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTCIR)) %>%
     reactable(
       resizable = T,
@@ -185,7 +220,7 @@ output$table_expenses <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     #mutate(
     #  STAFF_PCT = round((STAFFEXP / TOTOPEXP) * 100, 2),
     #  COLLECTION_PCT = round((TOTEXPCO / TOTOPEXP) * 100, 2),
@@ -287,7 +322,7 @@ output$table_staffexpenses <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
       resizable = T,
@@ -357,7 +392,7 @@ output$table_collectionexpenses <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
       resizable = T,
@@ -430,7 +465,7 @@ output$table_revenue <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     # mutate(
     #   LOCAL_PCT = round((LOCGVT / TOTINCM) * 100, 2),
     #   ST_PCT = round((STGVT / TOTINCM) * 100, 2),
@@ -545,7 +580,7 @@ output$table_services <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(VISITS)) %>%
     reactable(
       resizable = T,
@@ -616,7 +651,7 @@ output$table_internetaccess <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(GPTERMS)) %>%
     reactable(
       resizable = T,
@@ -683,7 +718,7 @@ output$table_programming <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTPRO)) %>%
     reactable(
       resizable = T,
@@ -765,7 +800,7 @@ output$table_programAttend <- renderReactable({
 
   df_table() %>%
     select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
-    mutate(across(c(cols), ~ as.numeric(.))) %>%
+    mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTATTEN)) %>%
     reactable(
       resizable = T,
