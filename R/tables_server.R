@@ -3,7 +3,7 @@
 df_table <- eventReactive(
   input$submit.table,
   {
-    pls %>%
+    pls_table %>%
       filter(
         STABR %in% input$states.table,
         CURRENT_LIBNAME_DISAMB %in% input$library.table,
@@ -43,15 +43,27 @@ observe({
 })
 
 
+#### Theming ####
+
+sticky_header_theme <- reactableTheme(
+  headerStyle = list(
+    position = "sticky",
+    top = 0,
+    background = "#f7f7f7", # Light gray background for the sticky header
+    zIndex = 1 # Ensure the header stays on top of other content
+  )
+)
+
+
 #### Collections ####
 
 output$table_collections <- renderReactable({
-  cols <- c("TOTPHYS", "BKVOL", "AUDIO_PH", "VIDEO_PH", "OTHMATS")
+  cols <- collection_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTPHYS)) %>%
     reactable(
@@ -73,6 +85,12 @@ output$table_collections <- renderReactable({
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
         FISCAL_YEAR = colDef(
           name = "Year",
           maxWidth = 75,
@@ -87,8 +105,7 @@ output$table_collections <- renderReactable({
           style = list(
             borderRight = "1px solid #aaa",
             backgroundColor = "#f7f7f7"
-          ),
-          headerStyle = list(borderRight = "1px solid #aaa")
+          )
         ),
         TOTPHYS = colDef(
           name = keylist$TOTPHYS,
@@ -117,22 +134,12 @@ output$table_collections <- renderReactable({
 
 #### Circulation ####
 output$table_circulation <- renderReactable({
-  cols <- c(
-    "TOTCIR",
-    "PHYSCIR",
-    "KIDCIRCL",
-    "ELMATCIR",
-    "OTHPHCIR",
-    "EBOOK_CIR",
-    "EAUDIO_CIR",
-    "EVIDEO_CIR",
-    "ESERIAL_CIR"
-  )
+  cols <- circulation_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTCIR)) %>%
     reactable(
@@ -151,6 +158,12 @@ output$table_circulation <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
@@ -214,12 +227,12 @@ output$table_circulation <- renderReactable({
 
 #### Expenses ####
 output$table_expenses <- renderReactable({
-  cols <- c("TOTOPEXP", "STAFFEXP", "TOTEXPCO", "OTHOPEXP")
+  cols <- expenses_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     #mutate(
     #  STAFF_PCT = round((STAFFEXP / TOTOPEXP) * 100, 2),
@@ -228,6 +241,7 @@ output$table_expenses <- renderReactable({
     #) %>%
     select(
       CURRENT_LIBNAME_DISAMB,
+      STABR,
       FISCAL_YEAR,
       POPU_LSA,
       TOTOPEXP,
@@ -258,6 +272,12 @@ output$table_expenses <- renderReactable({
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
         FISCAL_YEAR = colDef(
           name = "Year",
           maxWidth = 75,
@@ -277,13 +297,13 @@ output$table_expenses <- renderReactable({
         ),
         TOTOPEXP = colDef(
           name = keylist$TOTOPEXP,
-          format = colFormat(prefix = "$", separators = TRUE),
+          cell = maskedCurrencyCell,
           style = list(borderRight = "1px solid #aaa"),
           headerStyle = list(borderRight = "1px solid #aaa")
         ),
         STAFFEXP = colDef(
           name = keylist$STAFFEXP,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         # STAFF_PCT = colDef(
         #   name = "Staff % of Total",
@@ -293,7 +313,7 @@ output$table_expenses <- renderReactable({
         # ),
         TOTEXPCO = colDef(
           name = keylist$TOTEXPCO,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         # COLLECTION_PCT = colDef(
         #   name = "Collection % of Total",
@@ -303,7 +323,7 @@ output$table_expenses <- renderReactable({
         # ),
         OTHOPEXP = colDef(
           name = keylist$OTHOPEXP,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ) #,
         # OTHOP_PCT = colDef(
         #   name = "Other % of Total",
@@ -316,12 +336,12 @@ output$table_expenses <- renderReactable({
 
 #### Staff Expenses ####
 output$table_staffexpenses <- renderReactable({
-  cols <- c("TOTOPEXP", "STAFFEXP", "SALARIES", "BENEFIT")
+  cols <- staffexpenses_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
@@ -344,6 +364,12 @@ output$table_staffexpenses <- renderReactable({
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
         FISCAL_YEAR = colDef(
           name = "Year",
           maxWidth = 75,
@@ -363,21 +389,21 @@ output$table_staffexpenses <- renderReactable({
         headerStyle = list(borderRight = "1px solid #aaa"),
         TOTOPEXP = colDef(
           name = keylist$TOTOPEXP,
-          format = colFormat(prefix = "$", separators = TRUE),
+          cell = maskedCurrencyCell,
           style = list(borderRight = "1px solid #aaa"),
           headerStyle = list(borderRight = "1px solid #aaa")
         ),
         STAFFEXP = colDef(
           name = keylist$STAFFEXP,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         SALARIES = colDef(
           name = keylist$SALARIES,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         BENEFIT = colDef(
           name = keylist$BENEFIT,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         )
       )
     )
@@ -386,12 +412,12 @@ output$table_staffexpenses <- renderReactable({
 
 #### Collection Expenses ####
 output$table_collectionexpenses <- renderReactable({
-  cols <- c("TOTOPEXP", "TOTEXPCO", "PRMATEXP", "ELMATEXP", "OTHMATEX")
+  cols <- collectionexpenses_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTOPEXP)) %>%
     reactable(
@@ -410,6 +436,12 @@ output$table_collectionexpenses <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
@@ -432,25 +464,25 @@ output$table_collectionexpenses <- renderReactable({
         ),
         TOTOPEXP = colDef(
           name = keylist$TOTOPEXP,
-          format = colFormat(prefix = "$", separators = TRUE),
+          cell = maskedCurrencyCell,
           style = list(borderRight = "1px solid #aaa"),
           headerStyle = list(borderRight = "1px solid #aaa")
         ),
         TOTEXPCO = colDef(
           name = keylist$TOTEXPCO,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         PRMATEXP = colDef(
           name = keylist$PRMATEXP,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         ELMATEXP = colDef(
           name = keylist$ELMATEXP,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         OTHMATEX = colDef(
           name = keylist$OTHMATEX,
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         )
       )
     )
@@ -459,12 +491,12 @@ output$table_collectionexpenses <- renderReactable({
 
 #### Revenue ####
 output$table_revenue <- renderReactable({
-  cols <- c("TOTINCM", "LOCGVT", "STGVT", "FEDGVT", "OTHINCM")
+  cols <- revenue_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     # mutate(
     #   LOCAL_PCT = round((LOCGVT / TOTINCM) * 100, 2),
@@ -474,6 +506,7 @@ output$table_revenue <- renderReactable({
     # ) %>%
     select(
       CURRENT_LIBNAME_DISAMB,
+      STABR,
       FISCAL_YEAR,
       POPU_LSA,
       TOTINCM,
@@ -506,6 +539,12 @@ output$table_revenue <- renderReactable({
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
         FISCAL_YEAR = colDef(
           name = "Year",
           maxWidth = 75,
@@ -525,13 +564,13 @@ output$table_revenue <- renderReactable({
         ),
         TOTINCM = colDef(
           name = "Total Revenue",
-          format = colFormat(prefix = "$", separators = TRUE),
+          cell = maskedCurrencyCell,
           style = list(borderRight = "1px solid #aaa"),
           headerStyle = list(borderRight = "1px solid #aaa")
         ),
         LOCGVT = colDef(
           name = "Local Revenue",
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         # LOCAL_PCT = colDef(
         #   name = "Local % of Total",
@@ -541,7 +580,7 @@ output$table_revenue <- renderReactable({
         # ),
         STGVT = colDef(
           name = "State Revenue",
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         # ST_PCT = colDef(
         #   name = "State % of Total",
@@ -551,7 +590,7 @@ output$table_revenue <- renderReactable({
         # ),
         FEDGVT = colDef(
           name = "Federal Revenue",
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ),
         # FED_PCT = colDef(
         #   name = "Federal % of Total",
@@ -561,7 +600,7 @@ output$table_revenue <- renderReactable({
         # ),
         OTHINCM = colDef(
           name = "Other Revenue",
-          format = colFormat(prefix = "$", separators = TRUE)
+          cell = maskedCurrencyCell
         ) #,
         # OTH_PCT = colDef(
         #   name = "Other % of Total",
@@ -574,12 +613,12 @@ output$table_revenue <- renderReactable({
 
 #### Services ####
 output$table_services <- renderReactable({
-  cols <- c("VISITS", "REFERENC", "REGBOR", "LOANTO", "LOANFM")
+  cols <- services_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(VISITS)) %>%
     reactable(
@@ -598,6 +637,12 @@ output$table_services <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
@@ -645,12 +690,12 @@ output$table_services <- renderReactable({
 
 #### Internet Access ####
 output$table_internetaccess <- renderReactable({
-  cols <- c("GPTERMS", "PITUSR", "WIFISESS", "HOTSPOT")
+  cols <- internetaccess_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(GPTERMS)) %>%
     reactable(
@@ -669,6 +714,12 @@ output$table_internetaccess <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
@@ -712,12 +763,12 @@ output$table_internetaccess <- renderReactable({
 
 #### Programming ####
 output$table_programming <- renderReactable({
-  cols <- c("TOTPRO", "K0_5PRO", "K6_11PRO", "YAPRO", "ADULTPRO", "GENPRO")
+  cols <- programming_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTPRO)) %>%
     reactable(
@@ -736,6 +787,12 @@ output$table_programming <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),
@@ -787,19 +844,12 @@ output$table_programming <- renderReactable({
 
 #### Program Attendance ####
 output$table_programAttend <- renderReactable({
-  cols <- c(
-    "TOTATTEN",
-    "K0_5ATTEN",
-    "K6_11ATTEN",
-    "YAATTEN",
-    "ADULTATTEN",
-    "GENATTEN"
-  )
+  cols <- programAttend_cols
   key <- variable_key %>% filter(SHORTNAME %in% cols)
   keylist <- split(key$INDICATOR, key$SHORTNAME)
 
   df_table() %>%
-    select(CURRENT_LIBNAME_DISAMB, FISCAL_YEAR, POPU_LSA, cols) %>%
+    select(CURRENT_LIBNAME_DISAMB, STABR, FISCAL_YEAR, POPU_LSA, cols) %>%
     mutate(across(c(POPU_LSA, cols), ~ as.numeric(.))) %>%
     arrange(desc(FISCAL_YEAR), desc(TOTATTEN)) %>%
     reactable(
@@ -818,6 +868,12 @@ output$table_programAttend <- renderReactable({
         CURRENT_LIBNAME_DISAMB = colDef(
           name = "Library",
           maxWidth = 125,
+          sticky = "left",
+          style = list(backgroundColor = "#f7f7f7")
+        ),
+        STABR = colDef(
+          name = "State",
+          maxWidth = 75,
           sticky = "left",
           style = list(backgroundColor = "#f7f7f7")
         ),

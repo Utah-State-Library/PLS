@@ -8,3 +8,11 @@ csvDownloadButton <- function(
     onclick = sprintf("Reactable.downloadDataCSV('%s', '%s')", id, filename)
   )
 }
+
+maskedCurrencyCell <- function(value) {
+  if (!is.na(value) && value == -9) {
+    "Masked"
+  } else {
+    paste0("$", formatC(value, format = "f", big.mark = ",", digits = 0))
+  }
+}

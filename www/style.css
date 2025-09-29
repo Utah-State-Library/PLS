@@ -1,0 +1,31 @@
+.bootstrap-select .dropdown-toggle {
+    /* Default styles for the pickerInput */
+    background-color: #ccc;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.dropdown-toggle:hover {
+    /* Styles to apply when hovering over the pickerInput */
+    background-color: #2b61bfff !important;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+/* To style specific elements within the pickerInput, like dropdown items */
+.dropdown-item:hover {
+    background-color: #8ae1fbff !important;
+    /* Example: change background of dropdown items */
+    color: #333;
+}
+
+.btn-default {
+    background-color: #ccc;
+    color: #333;
+}
+
+.btn-default:hover {
+    background-color: #2b61bfff !important;
+    color: #ffffff;
+    cursor: pointer;
+}

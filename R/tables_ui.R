@@ -5,7 +5,8 @@ nav_panel(
 
   layout_sidebar(
     sidebar = sidebar(
-      width = "25%",
+      open = TRUE,
+      width = "30%",
 
       pickerInput(
         "table_selection",
