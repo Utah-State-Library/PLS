@@ -19,7 +19,7 @@ df_table <- eventReactive(
 observe({
   national_libnames <- pls %>%
     filter(STABR %in% input$states.table) %>%
-    summarise(CURRENT_LIBNAME_DISAMB) %>%
+    reframe(CURRENT_LIBNAME_DISAMB) %>%
     distinct() %>%
     pull() %>%
     sort()

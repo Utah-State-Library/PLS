@@ -12,6 +12,8 @@ csvDownloadButton <- function(
 maskedCurrencyCell <- function(value) {
   if (!is.na(value) && value == -9) {
     "Masked"
+  } else if (!is.na(value) && value == -3) {
+    "Missing"
   } else {
     paste0("$", formatC(value, format = "f", big.mark = ",", digits = 0))
   }
